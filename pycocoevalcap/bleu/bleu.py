@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# 
+#
 # File Name : bleu.py
 #
 # Description : Wrapper for BLEU scorer.
@@ -15,11 +15,12 @@ from .bleu_scorer import BleuScorer
 
 
 class Bleu:
-    def __init__(self, n=4):
+    def __init__(self, n=4, verbose=1):
         # default compute Blue score up to 4
         self._n = n
         self._hypo_for_image = {}
         self.ref_for_image = {}
+        self.verbose = verbose
 
     def compute_score(self, gts, res):
 
@@ -40,7 +41,9 @@ class Bleu:
             bleu_scorer += (hypo[0], ref)
 
         #score, scores = bleu_scorer.compute_score(option='shortest')
-        score, scores = bleu_scorer.compute_score(option='closest', verbose=1)
+        score, scores = bleu_scorer.compute_score(
+            option='closest', verbose=self.verbose
+        )
         #score, scores = bleu_scorer.compute_score(option='average', verbose=1)
 
         # return (bleu, bleu_info)

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Python wrapper for METEOR implementation, by Xinlei Chen
-# Acknowledge Michael Denkowski for the generous discussion and help 
+# Acknowledge Michael Denkowski for the generous discussion and help
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -15,19 +15,21 @@ import threading
 METEOR_JAR = 'meteor-1.5.jar'
 # print METEOR_JAR
 
+
 class Meteor:
 
     def __init__(self):
         self.env = os.environ
         self.env['LC_ALL'] = 'en_US.UTF_8'
-        self.meteor_cmd = ['java', '-jar', '-Xmx2G', METEOR_JAR, \
-                '-', '-', '-stdio', '-l', 'en', '-norm']
-        self.meteor_p = subprocess.Popen(self.meteor_cmd, \
-                cwd=os.path.dirname(os.path.abspath(__file__)), \
-                stdin=subprocess.PIPE, \
-                stdout=subprocess.PIPE, \
-                stderr=subprocess.PIPE,
-                env=self.env, universal_newlines=True, bufsize=1)
+        self.meteor_cmd = ['java', '-jar', '-Xmx2G', METEOR_JAR,
+                           '-', '-', '-stdio', '-l', 'en', '-norm']
+        self.meteor_p = subprocess.Popen(self.meteor_cmd,
+                                         cwd=os.path.dirname(
+                                             os.path.abspath(__file__)),
+                                         stdin=subprocess.PIPE,
+                                         stdout=subprocess.PIPE,
+                                         stderr=subprocess.PIPE,
+                                         env=self.env, universal_newlines=True, bufsize=1)
         # Used to guarantee thread safety
         self.lock = threading.Lock()
 
@@ -45,7 +47,7 @@ class Meteor:
 
         # Send to METEOR
         self.meteor_p.stdin.write(eval_line + '\n')
-        
+
         # Collect segment scores
         for i in range(len(imgIds)):
             score = float(self.meteor_p.stdout.readline().strip())
@@ -63,10 +65,11 @@ class Meteor:
     def _stat(self, hypothesis_str, reference_list):
         # SCORE ||| reference 1 words ||| reference n words ||| hypothesis words
         hypothesis_str = hypothesis_str.replace('|||', '').replace('  ', ' ')
-        score_line = ' ||| '.join(('SCORE', ' ||| '.join(reference_list), hypothesis_str))
+        score_line = ' ||| '.join(
+            ('SCORE', ' ||| '.join(reference_list), hypothesis_str))
         self.meteor_p.stdin.write(score_line+'\n')
         return self.meteor_p.stdout.readline().strip()
- 
+
     def __del__(self):
         self.lock.acquire()
         self.meteor_p.stdin.close()
